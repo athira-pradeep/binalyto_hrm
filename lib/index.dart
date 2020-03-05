@@ -118,6 +118,10 @@ class _indexPageState  extends State<IndexPage> {
 
   void _makeGetRequest(String type) async {
 
+
+
+
+
     final emprefs = await SharedPreferences.getInstance();
     final empname = emprefs.getString('employee');
     print(empname);
@@ -128,18 +132,32 @@ class _indexPageState  extends State<IndexPage> {
 //    var _time=jsonEncode(_Time);
     if(type=="in"){
 
-      String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin';
-      Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded'};
-      final msg = jsonEncode({"full_name":empname,"time":"05-03-2020T11:09:05","log_type":_logtype});
+      Map<String,String> json ={
+        "employee":"EMP-CKIN-03-2020-000001",
+        "time":"05-03-2020 10:37:08",
+        "log_type":"IN"
+      };
 
-      var response = await post(url,
-        headers: headers,
-        body: msg,
-      );
+
+
+
+
+      final msg = jsonEncode(json);
+
+
+      String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin';
+      Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
+//      final msg = jsonEncode({"full_name":_employee,"time":"05-03-2020T11:09:05","log_type":_logtype});
+//
+//      var response = await post(url,
+//        headers: headers,
+//        body: msg,
+//      );
+      Response response = await post(url, headers: headers, body: msg);
       int statusCode = response.statusCode;
       print(statusCode);
-      String json = response.body;
-      print(json);
+      String b1 = response.body;
+      print(b1);
 
 
 
