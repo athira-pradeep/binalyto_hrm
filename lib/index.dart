@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:binalyto_hrm/login.dart';
-
-
-
 
 class IndexPage extends StatefulWidget {
   @override
@@ -26,11 +23,11 @@ class _indexPageState  extends State<IndexPage> {
 
   Future<String>getData() async{
 
-    print("++++++++++++++");
-    String url = 'http://irtc.binalyto.com/api/resource/Employee';
-    Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
-    Response response= await get(url,headers: headers);
-    print(response.body);
+//    print("++++++++++++++");
+//    String url = 'http://irtc.binalyto.com/api/resource/Employee';
+//    Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
+//    var response= await get(url,headers: headers);
+//    print(response.body);
 //    rest=await SharedPreferences.getInstance();
 
 
@@ -177,13 +174,13 @@ class _indexPageState  extends State<IndexPage> {
 
   void _checkinPressed() {
     if (_formKey.currentState.validate()) {
-      final type="in";
+      final type="IN";
       _makeGetRequest(type);
 
     }
   }
   void _checkoutPressed(){
-    final type="out";
+    final type="OUT";
     _makeGetRequest(type);
     if(_formKey.currentState.validate()){
 
@@ -193,68 +190,23 @@ class _indexPageState  extends State<IndexPage> {
 
 
   void _makeGetRequest(String type) async {
+    var now = new DateTime.now(); // Generate time
+    SharedPreferences prefs = await SharedPreferences.getInstance(); //Load shared prefs
+    String sid = prefs.getString('ERP_sid');
 
-    initialState();
-    final emprefs = await SharedPreferences.getInstance();
-    final empname = emprefs.getString('employee');
-    print(empname);
-    var _employee="EMP-CKIN-03-2020-000001";
-    var _logtype="IN";
-//    var _Time=currentTimeInSeconds();
-//    print(_Time);
-//    var _time=jsonEncode(_Time);
-    if(type=="in"){
+    Map<String, String> header = {"Cookie": "sid=$sid", "Accept": "application/json","Content-Type": "application/json"}; // Prepare header
+    String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin'; //Target
+    String rqstBody = '{"time":"$now", "log_type": "$type"}'; //body. Employee ID will be picked automatically by server.
 
-      Map<String,String> json ={
-        "log_type":"IN"
-      };
+    //Make post request
+    var response = await http.post(url, headers: header, body: rqstBody.toString());
 
-      final msg = jsonEncode(json);
-
-      String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin';
-      Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
-//      final msg = jsonEncode({"full_name":_employee,"time":"05-03-2020T11:09:05","log_type":_logtype});
-//
-//      var response = await post(url,
-//        headers: headers,
-//        body: msg,
-//      );
-      Response response = await post(url, headers: headers, body: msg);
-      int statusCode = response.statusCode;
-      print(statusCode);
-      String b1 = response.body;
-      print(b1);
-
-
-
-
-//      Response response = await post(url,body: {"employee":_employee,"time":_time,"log_type":_logtype},headers: {"Content-Type":"appliction/x-www-form-urlencoded"});
-//      int statusCode = response.statusCode;
-//      Map<String, String> headers = response.headers;
-//      String contentType = headers['content-type'];
-//      String json = response.body;
-//
-//      print("***************************");
-//
-//      print(json);
-//      var data = jsonDecode(response.body);
-
-    }
-    else{
-      String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin';
-      var _Time=currentTimeInSeconds();
-      print(_Time);
-
-      Response response = await post(url,body:{"employee":"EMP-CKIN-03-2020-000001","time":"2018-03-29T16:40:00.000","log_type":"OUT"},headers: {"Accept":"application/json"});
-      int statusCode = response.statusCode;
-      Map<String, String> headers = response.headers;
-      String contentType = headers['content-type'];
-      String json = response.body;
-      print(json);
-      var data = jsonDecode(response.body);
-
-
-
+    //Let's validate response
+    int statusCode = response.statusCode; //Return status code.
+    if(statusCode == 200) {
+      print("Success");// Do success things
+    } else {
+      print(response.body.toString()); // Manage Errors here.
     }
 
   }
@@ -267,13 +219,10 @@ class _indexPageState  extends State<IndexPage> {
 
  void _setLogout() async{
    final prefs=await SharedPreferences.getInstance();
-   prefs.remove('rest');
-    print('test');
-    print(prefs.getInt('rest'));
+   await prefs.setInt('ERP_status', 0);
+   prefs.remove('ERP_sid');
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => Loginpage()));
-
-
  }
 
 
