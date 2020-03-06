@@ -4,10 +4,12 @@ import 'package:http/http.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:binalyto_hrm/login.dart';
 
 
 
-class IndexPage extends StatefulWidget{
+
+class IndexPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() =>_indexPageState();
 
@@ -21,11 +23,37 @@ enum FormType {
 
 
 class _indexPageState  extends State<IndexPage> {
+
+  Future<String>getData() async{
+
+    print("++++++++++++++");
+    String url = 'http://irtc.binalyto.com/api/resource/Employee';
+    Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
+    Response response= await get(url,headers: headers);
+    print(response.body);
+//    rest=await SharedPreferences.getInstance();
+
+
+//    String url = 'http://irtc.binalyto.com/api/resource/Employee';
+//    Response response=await get(url);
+//    String json=response.body;
+//    int scode=response.statusCode;
+//    print(scode);
+//    print(json);
+
+
+}
+
+
+
   final _formKey = GlobalKey<FormState>();
   FormType _form = FormType.login;
 
 
-
+  @override
+  void initialState(){
+    this.getData();
+  }
 
   void _formChange() async {
     setState(() {
@@ -41,6 +69,8 @@ class _indexPageState  extends State<IndexPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: _buildBar(),
+      drawer:_buidSideBar(),
+
       body: new Center(
         child: new SingleChildScrollView(
           child: new Container(
@@ -50,6 +80,12 @@ class _indexPageState  extends State<IndexPage> {
                 key: _formKey,
                 child: new Column(
                   children: <Widget>[
+                    Text(
+                      'Employee Name',
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
+                    ),
                     _buildButtons(),
                   ],
                 ),
@@ -61,6 +97,37 @@ class _indexPageState  extends State<IndexPage> {
       ),
     );
   }
+
+  @override
+  Widget _buidSideBar(){
+    return new Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            child: Text(
+              'Side menu',
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            ),
+            decoration: BoxDecoration(
+                color: Colors.green,
+                image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage('assets/images/cover.jpg'))),
+          ),
+          ListTile(
+            leading: Icon(Icons.exit_to_app),
+            title: Text('Logout'),
+            onTap: _setLogout,
+//            onTap: () => {Navigator.of(context).pop()},
+          ),
+        ],
+      ),
+
+    );
+  }
+
+
 
   Widget _buildBar() {
     return new AppBar(
@@ -75,22 +142,31 @@ class _indexPageState  extends State<IndexPage> {
       return new Container(
         child: new Column(
           children: <Widget>[
+
+            const SizedBox(height: 50),
+          new RaisedButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+
+                ),
+                padding : EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
+                color: Colors.lightBlueAccent,
+                child: new Text('Check In',style: TextStyle(fontWeight: FontWeight.bold),),
+                textColor:Colors.white,
+                onPressed: _checkinPressed,
+              ),
+            const SizedBox(height: 30),
             new RaisedButton(
+
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
+
               ),
-              padding: EdgeInsets.all(12),
+              padding : EdgeInsets.fromLTRB(50.0, 20.0, 50.0, 20.0),
+
               color: Colors.lightBlueAccent,
-              child: new Text('Check In'),
-              onPressed: _checkinPressed,
-            ),
-            new RaisedButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: EdgeInsets.all(12),
-              color: Colors.lightBlueAccent,
-              child: new Text('Check Out'),
+              child: new Text('Check Out',style: TextStyle(fontWeight: FontWeight.bold)),
+              textColor:Colors.white,
               onPressed: _checkoutPressed,
             ),
           ],
@@ -118,10 +194,7 @@ class _indexPageState  extends State<IndexPage> {
 
   void _makeGetRequest(String type) async {
 
-
-
-
-
+    initialState();
     final emprefs = await SharedPreferences.getInstance();
     final empname = emprefs.getString('employee');
     print(empname);
@@ -133,17 +206,10 @@ class _indexPageState  extends State<IndexPage> {
     if(type=="in"){
 
       Map<String,String> json ={
-        "employee":"EMP-CKIN-03-2020-000001",
-        "time":"05-03-2020 10:37:08",
         "log_type":"IN"
       };
 
-
-
-
-
       final msg = jsonEncode(json);
-
 
       String url = 'http://irtc.binalyto.com/api/resource/Employee Checkin';
       Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
@@ -198,6 +264,17 @@ class _indexPageState  extends State<IndexPage> {
 //    final tm=ms;
     return ms;
   }
+
+ void _setLogout() async{
+   final prefs=await SharedPreferences.getInstance();
+   prefs.remove('rest');
+    print('test');
+    print(prefs.getInt('rest'));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => Loginpage()));
+
+
+ }
 
 
 

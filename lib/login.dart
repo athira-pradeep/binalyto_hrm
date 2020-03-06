@@ -220,43 +220,15 @@ class _newLoginState extends State<Loginpage>{
     Map<String, String> headers =response.headers;
     print(headers);
     String contentType = headers['content-type'];
-
-//    String rawCookie = response.headers['set-cookie'];
-//    var index=rawCookie.split(';');
-//    var ind=index[4];
-//    var Sid=ind.split(',');
-//    var SID=Sid[1].split('=');
-//    var orsid=SID[1];
-//    print(orsid);
-//    print(contentType);
-//    print(rawCookie);
-    String json = response.body;
-
-    var data = jsonDecode(response.body);
-    print(json);
-
-    print(data["full_name"]);
-    var rest = data["message"];
-    if(rest=="Logged In"){
-      print("############");
-      rest=1;
-    }
-    else{
-      rest=0;
-    }
-    print(rest);
-
-//    final sidprefs=await SharedPreferences.getInstance();
-//    sidprefs.setString('sid', orsid);
-
+    print(contentType);
     final prefs=await SharedPreferences.getInstance();
-    prefs.setInt('rest',rest);
-    var emp=data["full_name"];
-    final emprefs=await SharedPreferences.getInstance();
-    emprefs.setString("employee",emp );
-
-    if(rest == 1) {
-      if(prefs.getInt('rest')==1){
+    prefs.setInt('StatusCode',statusCode);
+    print(statusCode);
+    if(statusCode == 200) {
+      if(prefs.getInt('StatusCode')=="200"){
+        String json = response.body;
+        var data = jsonDecode(response.body);
+        print(json);
         print("testSharedPreferences");
         Navigator.push(context,
           MaterialPageRoute(builder: (context) => IndexPage()),
@@ -278,9 +250,5 @@ class _newLoginState extends State<Loginpage>{
 
     }
 
-
-
-
-
-  }
+}
 
