@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:binalyto_hrm/index.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -212,41 +212,35 @@ class _newLoginState extends State<Loginpage>{
 
   void _makeGetRequest() async {
 //     make POST request
-    print("makeGETREnsdjsbcj");
+    Map<String, String> header = {"Accept": "application/json","Content-Type": "application/json"};
     String url = 'http://irtc.binalyto.com/api/method/login';
-    Response response = await post(url,body: {"usr":_email, "pwd":_password});
-    // sample info available in response
-    int statusCode = response.statusCode;
-    Map<String, String> headers =response.headers;
-    print(headers);
-    String contentType = headers['content-type'];
-    print(contentType);
-    final prefs=await SharedPreferences.getInstance();
-    prefs.setInt('StatusCode',statusCode);
+    String rqstBody = '{"usr":"$_email", "pwd":"$_password"}';
+
+    //Make post request
+    var response = await http.post(url, headers: header, body: rqstBody);
+
+    //Let's validate response
+    int statusCode = response.statusCode; //Return status code.
     print(statusCode);
-    if(statusCode == 200) {
-      if(prefs.getInt('StatusCode')=="200"){
-        String json = response.body;
-        var data = jsonDecode(response.body);
-        print(json);
-        print("testSharedPreferences");
+      if(statusCode == 200) { // If login is success.
+        print(response.headers);
+        String sid = response.headers['set-cookie'].split(',')[4].split(';')[0].split('=')[1].toString(); //Split header to get sid
+        String full_name = jsonDecode(response.body)["full_name"];
+        SharedPreferences prefs = await SharedPreferences.getInstance(); //Load shared preferences to store session data
+        await prefs.setInt('ERP_status', 1);
+        await prefs.setString("ERP_sid", sid);
+        await prefs.setString("full_name", full_name);
+        //Navigate to Next page
         Navigator.push(context,
           MaterialPageRoute(builder: (context) => IndexPage()),
 
         );
-
+      } else { //if not succeeded
+        AlertDialog(title: Text("Incorrect Username or password")); //TODO: Error not working @Athira
+        Navigator.push(context,
+          MaterialPageRoute(builder: (context)=>Loginpage()),
+        );
       }
-
-    }
-    else
-    {
-      AlertDialog(title: Text("Incorrect Username or password"));
-      Navigator.push(context,
-        MaterialPageRoute(builder: (context)=>Loginpage()),
-      );
-
-    }
-
 
     }
 
