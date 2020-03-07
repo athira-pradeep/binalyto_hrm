@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:binalyto_hrm/login.dart';
 
-class IndexPage extends StatefulWidget {
+class IndexPage extends StatefulWidget{
+
   @override
   State<StatefulWidget> createState() =>_indexPageState();
 
@@ -21,36 +22,22 @@ enum FormType {
 
 class _indexPageState  extends State<IndexPage> {
 
-  Future<String>getData() async{
+  String name_str;
+  TextEditingController name = TextEditingController();
 
-//    print("++++++++++++++");
-//    String url = 'http://irtc.binalyto.com/api/resource/Employee';
-//    Map<String,String> headers = {'Content-Type':'application/x-www-form-urlencoded', "Accept":"application/json"};
-//    var response= await get(url,headers: headers);
-//    print(response.body);
-//    rest=await SharedPreferences.getInstance();
+  Future<void> main() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var status = prefs.getBool('isLoggedIn') ?? false;
+    print(status);
+    runApp(MaterialApp(home: status == true ? Loginpage() : IndexPage()));
 
-
-//    String url = 'http://irtc.binalyto.com/api/resource/Employee';
-//    Response response=await get(url);
-//    String json=response.body;
-//    int scode=response.statusCode;
-//    print(scode);
-//    print(json);
-
-
-}
+  }
 
 
 
   final _formKey = GlobalKey<FormState>();
   FormType _form = FormType.login;
 
-
-  @override
-  void initialState(){
-    this.getData();
-  }
 
   void _formChange() async {
     setState(() {
@@ -63,7 +50,7 @@ class _indexPageState  extends State<IndexPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return new Scaffold(
       appBar: _buildBar(),
       drawer:_buidSideBar(),
@@ -77,8 +64,9 @@ class _indexPageState  extends State<IndexPage> {
                 key: _formKey,
                 child: new Column(
                   children: <Widget>[
+
                     Text(
-                      'Employee Name',
+                      'Name of the user',
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
@@ -108,15 +96,12 @@ class _indexPageState  extends State<IndexPage> {
             ),
             decoration: BoxDecoration(
                 color: Colors.green,
-                image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: AssetImage('assets/images/cover.jpg'))),
+                ),
           ),
           ListTile(
             leading: Icon(Icons.exit_to_app),
             title: Text('Logout'),
             onTap: _setLogout,
-//            onTap: () => {Navigator.of(context).pop()},
           ),
         ],
       ),
@@ -125,6 +110,11 @@ class _indexPageState  extends State<IndexPage> {
   }
 
 
+
+  Future _textBuild() async{
+
+
+  }
 
   Widget _buildBar() {
     return new AppBar(
@@ -217,12 +207,21 @@ class _indexPageState  extends State<IndexPage> {
     return ms;
   }
 
- void _setLogout() async{
-   final prefs=await SharedPreferences.getInstance();
-   await prefs.setInt('ERP_status', 0);
-   prefs.remove('ERP_sid');
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => Loginpage()));
+ void _setLogout() async {
+//   final prefs=await SharedPreferences.getInstance();
+//   prefs.setInt('ERP_status', 0);
+//   prefs.remove('ERP_sid');
+////   print(prefs.getInt('ERP_status'));
+//   Navigator.push(context, MaterialPageRoute(builder: (context) => Loginpage()));
+//
+// }
+
+   SharedPreferences prefs = await SharedPreferences.getInstance();
+   prefs?.clear();// Clear preferences
+   Navigator.pushReplacement(context,
+     MaterialPageRoute(builder: (BuildContext context) => Loginpage()),
+
+   );
  }
 
 

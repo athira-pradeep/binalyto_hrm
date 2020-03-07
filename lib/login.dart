@@ -24,6 +24,9 @@ enum FormType {
 
 class _newLoginState extends State<Loginpage>{
 
+
+
+
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _emailFilter = new TextEditingController();
@@ -64,6 +67,19 @@ class _newLoginState extends State<Loginpage>{
       }
     });
   }
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    Timer(Duration(seconds: 50), () {
+      navigateUser(); //It will redirect  after 3 seconds
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +224,24 @@ class _newLoginState extends State<Loginpage>{
   }
 
 
+  void navigateUser() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var status = prefs.getBool('isLoggedIn') ?? false;
+    print(status);
+    if (status) {
+      Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => IndexPage()),
+
+      );
+
+    } else {
+      Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => Loginpage()),
+
+      );
+      ;
+    }
+  }
 
 
   void _makeGetRequest() async {
@@ -221,24 +255,52 @@ class _newLoginState extends State<Loginpage>{
 
     //Let's validate response
     int statusCode = response.statusCode; //Return status code.
-    print(statusCode);
-      if(statusCode == 200) { // If login is success.
-        print(response.headers);
-        String sid = response.headers['set-cookie'].split(',')[4].split(';')[0].split('=')[1].toString(); //Split header to get sid
-        String full_name = jsonDecode(response.body)["full_name"];
-        SharedPreferences prefs = await SharedPreferences.getInstance(); //Load shared preferences to store session data
-        await prefs.setInt('ERP_status', 1);
-        await prefs.setString("ERP_sid", sid);
-        await prefs.setString("full_name", full_name);
-        //Navigate to Next page
-        Navigator.push(context,
-          MaterialPageRoute(builder: (context) => IndexPage()),
 
-        );
-      } else { //if not succeeded
-        AlertDialog(title: Text("Incorrect Username or password")); //TODO: Error not working @Athira
-        Navigator.push(context,
-          MaterialPageRoute(builder: (context)=>Loginpage()),
+    print(statusCode);
+      if(statusCode == 200) {// If login is success.
+
+          SharedPreferences pref = await SharedPreferences.getInstance();
+          pref?.setBool("isLoggedIn", true);
+
+          print(response.headers);
+          String sid = response.headers['set-cookie'].split(',')[4].split(';')[0].split('=')[1].toString(); //Split header to get sid
+          String full_name = jsonDecode(response.body)["full_name"];
+          SharedPreferences prefs = await SharedPreferences.getInstance(); //Load shared preferences to store session data
+          await prefs.setInt('ERP_status', 1);
+          await prefs.setString("ERP_sid", sid);
+          await prefs.setString("full_name", full_name);
+          print(prefs.getInt('ERP_status'));
+          if(prefs.getInt('ERP_status')==1){
+            //Navigate to Next page
+            Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) => IndexPage()),
+
+            );
+
+
+          }
+
+        }
+
+      else { //if not succeeded
+        return showDialog<void>(//Load DialogBox
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog( // Load AlertDialoge
+              content: const Text('Incorrect username or password'),
+              actions: <Widget>[
+                FlatButton( //FlatButton
+                  child: Text('Ok'),
+                  onPressed: () {//Press ok ,Navigate to Login page
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Loginpage()),
+
+                    );
+                  },
+                ),
+              ],
+            );
+          },
         );
       }
 
