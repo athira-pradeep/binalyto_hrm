@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -22,8 +23,10 @@ enum FormType {
 
 class _indexPageState  extends State<IndexPage> {
 
+  String data = "";
   String name_str;
-  TextEditingController name = TextEditingController();
+  TextEditingController controller = TextEditingController();
+  Future<SharedPreferences> pref=SharedPreferences.getInstance();
 
   Future<void> main() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -34,10 +37,18 @@ class _indexPageState  extends State<IndexPage> {
   }
 
 
+//  Future<String> getName() async{
+//    SharedPreferences prefs=await SharedPreferences.getInstance();
+//    name_str=prefs.getString('full_name');
+//
+//
+//    return name_str;
+//  }
+
+
 
   final _formKey = GlobalKey<FormState>();
   FormType _form = FormType.login;
-
 
   void _formChange() async {
     setState(() {
@@ -64,12 +75,8 @@ class _indexPageState  extends State<IndexPage> {
                 key: _formKey,
                 child: new Column(
                   children: <Widget>[
-
-                    Text(
-                      'Name of the user',
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),
+                    TextField(
+                      obscureText: getText(),
                     ),
                     _buildButtons(),
                   ],
@@ -83,8 +90,10 @@ class _indexPageState  extends State<IndexPage> {
     );
   }
 
+
+
   @override
-  Widget _buidSideBar(){
+  Widget _buidSideBar() {
     return new Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -111,10 +120,25 @@ class _indexPageState  extends State<IndexPage> {
 
 
 
-  Future _textBuild() async{
-
+  @override
+  Widget _Textfied(String name){
+    return Text(
+      'Employee name',
+    );
 
   }
+
+
+  getText() async{
+    SharedPreferences pre=await SharedPreferences.getInstance();
+    name_str=pre.getString('full_name');
+    print("++++++++++++");
+    return name_str;
+  }
+
+
+
+
 
   Widget _buildBar() {
     return new AppBar(
@@ -208,13 +232,6 @@ class _indexPageState  extends State<IndexPage> {
   }
 
  void _setLogout() async {
-//   final prefs=await SharedPreferences.getInstance();
-//   prefs.setInt('ERP_status', 0);
-//   prefs.remove('ERP_sid');
-////   print(prefs.getInt('ERP_status'));
-//   Navigator.push(context, MaterialPageRoute(builder: (context) => Loginpage()));
-//
-// }
 
    SharedPreferences prefs = await SharedPreferences.getInstance();
    prefs?.clear();// Clear preferences

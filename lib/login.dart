@@ -72,6 +72,7 @@ class _newLoginState extends State<Loginpage>{
     // TODO: implement initState
     super.initState();
     startTimer();
+
   }
 
   void startTimer() {
@@ -224,7 +225,7 @@ class _newLoginState extends State<Loginpage>{
   }
 
 
-  void navigateUser() async{
+  void navigateUser() async{ // Login validation
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var status = prefs.getBool('isLoggedIn') ?? false;
     print(status);
@@ -261,7 +262,6 @@ class _newLoginState extends State<Loginpage>{
 
           SharedPreferences pref = await SharedPreferences.getInstance();
           pref?.setBool("isLoggedIn", true);
-
           print(response.headers);
           String sid = response.headers['set-cookie'].split(',')[4].split(';')[0].split('=')[1].toString(); //Split header to get sid
           String full_name = jsonDecode(response.body)["full_name"];
